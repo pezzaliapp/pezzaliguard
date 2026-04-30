@@ -67,6 +67,55 @@
     <!-- =============== DASHBOARD =============== -->
     <section class="view active" id="view-dashboard" aria-label="Dashboard">
 
+      <!-- Onboarding banner — shown only on first visit, dismissed forever once closed -->
+      <div id="onboarding" class="onboarding-banner" hidden>
+        <div class="onboarding-head">
+          <div class="onboarding-title">
+            <span class="onboarding-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <path d="M9 12l2 2 4-4"/>
+              </svg>
+            </span>
+            <strong>Benvenuto su PezzaliGuard</strong>
+          </div>
+          <button class="onboarding-close" type="button" data-action="dismiss-onboarding" aria-label="Chiudi">×</button>
+        </div>
+        <p class="onboarding-intro">
+          PezzaliGuard è il tuo database personale di numeri spam.
+          I dati restano sul telefono, niente account, niente backend.
+          Per iniziare ti consigliamo questi 3 passi:
+        </p>
+        <ol class="onboarding-steps">
+          <li>
+            <span class="onboarding-step-num">1</span>
+            <div class="onboarding-step-text">
+              <strong>Importa la Lista italiana curata</strong>
+              <small>~7 numeri pre-segnalati pronti da usare</small>
+            </div>
+            <button class="onboarding-step-btn" type="button" data-action="onboarding-goto-import">Vai →</button>
+          </li>
+          <li>
+            <span class="onboarding-step-num">2</span>
+            <div class="onboarding-step-text">
+              <strong>Aggiungi i tuoi numeri</strong>
+              <small>Quelli che ti hanno chiamato e vuoi ricordare</small>
+            </div>
+            <button class="onboarding-step-btn" type="button" data-action="add-spam">Vai →</button>
+          </li>
+          <li>
+            <span class="onboarding-step-num">3</span>
+            <div class="onboarding-step-text">
+              <strong>Esporta in JSON</strong>
+              <small>Quando sei pronto per usarlo in un'app iOS</small>
+            </div>
+          </li>
+        </ol>
+        <button class="onboarding-dismiss" type="button" data-action="dismiss-onboarding">
+          Ho capito, chiudi
+        </button>
+      </div>
+
       <div class="hero-card">
         <div class="hero-row">
           <div class="hero-label">Stato database</div>

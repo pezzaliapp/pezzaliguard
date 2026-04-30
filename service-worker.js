@@ -7,7 +7,7 @@
    The cache name is versioned; bumping the suffix invalidates old caches.
    =================================================================== */
 
-const CACHE = 'pezzaliguard-v1.3.0';
+const CACHE = 'pezzaliguard-v1.4.0';
 
 // Files we want available offline. All paths are relative to the SW scope,
 // so the same file works on root domains AND on any GitHub Pages subpath.

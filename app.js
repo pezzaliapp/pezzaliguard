@@ -11,7 +11,7 @@
      0. Constants
      ----------------------------------------------------------------- */
   const STORAGE_KEY = 'pezzaliguard:db:v1';
-  const APP_VERSION = '1.2.0';
+  const APP_VERSION = '1.3.0';
   const DB_VERSION  = '1.0.0';
 
   // Categories used in the dropdown — single source of truth.
@@ -939,8 +939,41 @@
       case 'import-csv':       triggerImport('csv'); break;
       case 'show-stats':       showStats(); break;
       case 'wipe-db':          wipeDB(); break;
+      case 'dismiss-onboarding':       Onboarding.dismiss(); break;
+      case 'onboarding-goto-import':   Onboarding.gotoImport(); break;
     }
   }
+
+  /* -----------------------------------------------------------------
+     14a. Onboarding (welcome banner shown on first visit)
+     ----------------------------------------------------------------- */
+  const Onboarding = {
+    storageKey: 'pezzaliguard:onboarding:dismissed',
+
+    init() {
+      const banner = document.getElementById('onboarding');
+      if (!banner) return;
+      const dismissed = localStorage.getItem(Onboarding.storageKey);
+      if (!dismissed) banner.hidden = false;
+    },
+
+    dismiss() {
+      localStorage.setItem(Onboarding.storageKey, '1');
+      const banner = document.getElementById('onboarding');
+      if (banner) banner.hidden = true;
+    },
+
+    gotoImport() {
+      // Switch to tools view, then scroll to community lists section
+      showView('tools');
+      setTimeout(() => {
+        const target = document.getElementById('communityLists');
+        if (target && target.scrollIntoView) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }, 80);
+    }
+  };
 
   /* -----------------------------------------------------------------
      14b. Community lists (importable phone-number databases)
@@ -1314,6 +1347,7 @@
     bindGlobalEvents();
     render();
     registerSW();
+    Onboarding.init();
     CommunityLists.render();
     PrefixWatcher.init().then(() => {
       PrefixWatcher.bindFormWatcher();
