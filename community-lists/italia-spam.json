@@ -15,19 +15,5 @@
     { "number": 39058603208100, "label": "Call Center - Livorno (VOIP)" }
   ],
   "block": [],
-  "whitelist": [],
-  "prefix_warnings": {
-    "international": [
-      { "prefix": "+255", "country": "Tanzania", "reason": "Wangiri / squillo a pagamento" },
-      { "prefix": "+370", "country": "Lituania", "reason": "Wangiri / squillo a pagamento" },
-      { "prefix": "+371", "country": "Lettonia", "reason": "Wangiri / squillo a pagamento" },
-      { "prefix": "+375", "country": "Bielorussia", "reason": "Wangiri / squillo a pagamento" },
-      { "prefix": "+381", "country": "Serbia", "reason": "Wangiri / squillo a pagamento" },
-      { "prefix": "+563", "country": "Cile (Valparaiso)", "reason": "Wangiri / squillo a pagamento" }
-    ],
-    "national": [
-      { "prefix": "899", "type": "italiano a pagamento", "reason": "Numerazione a tariffazione speciale" }
-    ],
-    "note": "I prefissi internazionali sopra sono usati per la 'truffa Wangiri': la chiamata squilla brevemente per indurti a richiamare a tariffe esorbitanti. Non richiamare mai numeri sconosciuti con questi prefissi."
-  }
+  "whitelist": []
 }

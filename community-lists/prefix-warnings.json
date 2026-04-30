@@ -1,0 +1,40 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-04-30",
+  "name": "Prefissi pericolosi",
+  "description": "Database di prefissi telefonici noti per essere associati a truffe, numerazioni a pagamento o categorie AGCom.",
+  "categories": {
+    "wangiri-international": {
+      "label": "Truffa Wangiri (estero)",
+      "severity": "danger",
+      "description": "Prefisso usato per la truffa dello squillo: il numero squilla brevemente per indurti a richiamare a tariffe esorbitanti. Non richiamare mai numeri sconosciuti con questi prefissi."
+    },
+    "premium-italian": {
+      "label": "Numerazione italiana a pagamento",
+      "severity": "warning",
+      "description": "Numerazioni a tariffa maggiorata. Costo elevato per chi chiama, spesso usate per servizi a sovrapprezzo o concorsi."
+    },
+    "agcom-marketing": {
+      "label": "Marketing AGCom (delibera 21/26/CIR)",
+      "severity": "info",
+      "description": "Prefisso AGCom che identifica chiamate di marketing. Sistema approvato dalla commissione Infrastrutture e Reti AGCom il 27 aprile 2026; lista ufficiale dei prefissi non ancora pubblicata.",
+      "pending": true,
+      "source": "AGCom delibera 21/26/CIR del 27 aprile 2026"
+    }
+  },
+  "prefixes": [
+    { "prefix": "+255", "category": "wangiri-international", "country": "Tanzania" },
+    { "prefix": "+370", "category": "wangiri-international", "country": "Lituania" },
+    { "prefix": "+371", "category": "wangiri-international", "country": "Lettonia" },
+    { "prefix": "+375", "category": "wangiri-international", "country": "Bielorussia" },
+    { "prefix": "+381", "category": "wangiri-international", "country": "Serbia" },
+    { "prefix": "+563", "category": "wangiri-international", "country": "Cile (Valparaiso)" },
+    { "prefix": "+39 899", "category": "premium-italian", "country": "Italia" },
+    { "prefix": "+39 144", "category": "premium-italian", "country": "Italia" },
+    { "prefix": "+39 166", "category": "premium-italian", "country": "Italia" }
+  ],
+  "notes": [
+    "Le categorie sono pensate per essere estese: quando AGCom pubblicherà la lista dei prefissi a 3 cifre per il classificatore di chiamata (delibera 21/26/CIR), basterà aggiungere righe nella sezione 'prefixes' con category: 'agcom-marketing' (o nuove categorie come 'agcom-services', 'agcom-public', etc.).",
+    "Il formato del campo 'prefix' è cosmetico (con +): il matcher lo normalizza in cifre prima del confronto. Quindi '+39 899' funziona come '+39 144' o '+255'."
+  ]
+}
