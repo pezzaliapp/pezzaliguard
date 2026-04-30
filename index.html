@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=5" />
+  <meta name="theme-color" content="#0a0e16" />
+  <meta name="color-scheme" content="dark" />
+
+  <!-- iOS PWA -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="PezzaliGuard" />
+
+  <meta name="description" content="Dashboard personale per gestire numeri spam, blacklist e whitelist. Privacy-first, funziona offline, zero backend." />
+
+  <title>PezzaliGuard — Spam Number Manager</title>
+
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="icons/favicon.svg" />
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ================================================================== -->
+  <!-- HEADER                                                              -->
+  <!-- ================================================================== -->
+  <header class="app-header" role="banner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <!-- Inline shield mark — keeps offline rendering even if SVG file fails -->
+        <svg viewBox="0 0 32 32" width="28" height="28">
+          <defs>
+            <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#ff5b6b"/>
+              <stop offset="100%" stop-color="#a1322d"/>
+            </linearGradient>
+          </defs>
+          <path d="M16 2 L28 6 V16 C28 23 22 28 16 30 C10 28 4 23 4 16 V6 Z"
+                fill="url(#g)" stroke="#ff8a96" stroke-width="0.5"/>
+          <path d="M11 16 L14.5 19.5 L21 12.5"
+                fill="none" stroke="#0a0e16" stroke-width="2.4"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </span>
+      <div class="brand-text">
+        <div class="brand-title">PezzaliGuard</div>
+        <div class="brand-sub" id="brandStatus">Database locale · Privacy first</div>
+      </div>
+    </div>
+    <button class="icon-btn" id="quickInfoBtn" aria-label="Informazioni privacy">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>
+      </svg>
+    </button>
+  </header>
+
+  <!-- ================================================================== -->
+  <!-- MAIN VIEWS                                                          -->
+  <!-- ================================================================== -->
+  <main class="app-main" id="appMain">
+
+    <!-- =============== DASHBOARD =============== -->
+    <section class="view active" id="view-dashboard" aria-label="Dashboard">
+
+      <div class="hero-card">
+        <div class="hero-row">
+          <div class="hero-label">Stato database</div>
+          <div class="hero-pill" id="dbStatePill">OK</div>
+        </div>
+        <div class="hero-big" id="dbTotal">0</div>
+        <div class="hero-sublabel">contatti totali archiviati</div>
+        <div class="hero-meta">
+          <span>Ultima modifica:&nbsp;<strong id="dbUpdated">—</strong></span>
+          <span class="hero-version">v<span id="dbVersion">1.0.0</span></span>
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <article class="stat-card stat-block">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+            </svg>
+          </div>
+          <div class="stat-num" id="countBlock">0</div>
+          <div class="stat-label">Blacklist (block)</div>
+        </article>
+
+        <article class="stat-card stat-identify">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+              <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+          </div>
+          <div class="stat-num" id="countIdentify">0</div>
+          <div class="stat-label">Identifica (spam)</div>
+        </article>
+
+        <article class="stat-card stat-whitelist">
+          <div class="stat-icon">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+          </div>
+          <div class="stat-num" id="countWhitelist">0</div>
+          <div class="stat-label">Whitelist (sicuri)</div>
+        </article>
+      </div>
+
+      <h2 class="section-title">Azioni rapide</h2>
+      <div class="quick-actions">
+        <button class="qa-btn qa-primary" data-action="add-spam">
+          <span class="qa-icon">+</span>
+          <span class="qa-text"><strong>Aggiungi numero</strong><small>Spam, truffa, telemarketing…</small></span>
+        </button>
+        <button class="qa-btn" data-action="add-whitelist">
+          <span class="qa-icon qa-icon-green">✓</span>
+          <span class="qa-text"><strong>Aggiungi a whitelist</strong><small>Cliente, famiglia, lavoro…</small></span>
+        </button>
+        <button class="qa-btn" data-action="export-json">
+          <span class="qa-icon qa-icon-blue">↓</span>
+          <span class="qa-text"><strong>Esporta database</strong><small>JSON compatibile iOS</small></span>
+        </button>
+        <button class="qa-btn" data-action="import">
+          <span class="qa-icon qa-icon-amber">↑</span>
+          <span class="qa-text"><strong>Importa database</strong><small>JSON o CSV</small></span>
+        </button>
+      </div>
+
+      <h2 class="section-title">Aggiunti di recente</h2>
+      <div id="recentList" class="recent-list">
+        <div class="empty-state">
+          <p>Nessun numero ancora archiviato.</p>
+          <p class="empty-sub">Aggiungi il primo numero o importa un CSV.</p>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- =============== NUMBERS LIST =============== -->
+    <section class="view" id="view-numbers" aria-label="Numeri spam">
+
+      <div class="search-bar">
+        <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="search" id="searchInput" placeholder="Cerca per numero, etichetta o nota…" autocomplete="off" inputmode="search" />
+        <button class="search-clear" id="searchClear" aria-label="Pulisci ricerca">×</button>
+      </div>
+
+      <div class="filter-chips" id="filterChips">
+        <button class="chip active" data-filter="all">Tutti</button>
+        <button class="chip" data-filter="block">Blocca</button>
+        <button class="chip" data-filter="identify">Identifica</button>
+      </div>
+
+      <div class="list-meta">
+        <span id="listCount">0 numeri</span>
+        <button class="link-btn" id="sortToggle">Più recenti ▾</button>
+      </div>
+
+      <div id="numbersList" class="entry-list"></div>
+
+    </section>
+
+    <!-- =============== WHITELIST =============== -->
+    <section class="view" id="view-whitelist" aria-label="Whitelist">
+
+      <div class="info-banner info-banner-green">
+        <strong>Whitelist sicura.</strong>
+        Numeri di clienti, fornitori, famiglia o lavoro che non devono mai essere bloccati.
+      </div>
+
+      <div class="search-bar">
+        <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+        </svg>
+        <input type="search" id="whitelistSearch" placeholder="Cerca whitelist…" autocomplete="off" inputmode="search" />
+      </div>
+
+      <div class="list-meta">
+        <span id="whitelistCount">0 numeri</span>
+        <button class="link-btn" id="exportWhitelistBtn">Esporta solo whitelist</button>
+      </div>
+
+      <div id="whitelistList" class="entry-list"></div>
+
+    </section>
+
+    <!-- =============== TOOLS =============== -->
+    <section class="view" id="view-tools" aria-label="Strumenti">
+
+      <h2 class="section-title">Esporta</h2>
+      <div class="tool-group">
+        <button class="tool-btn" data-action="export-json">
+          <div class="tool-icon">JSON</div>
+          <div class="tool-text">
+            <strong>Esporta come JSON</strong>
+            <small>Formato <code>spam-numbers.json</code> compatibile con la futura app iOS nativa CallKit</small>
+          </div>
+        </button>
+        <button class="tool-btn" data-action="export-csv">
+          <div class="tool-icon">CSV</div>
+          <div class="tool-text">
+            <strong>Esporta come CSV</strong>
+            <small>Foglio di calcolo, leggibile da Excel / Numbers</small>
+          </div>
+        </button>
+        <button class="tool-btn" data-action="export-whitelist">
+          <div class="tool-icon">✓</div>
+          <div class="tool-text">
+            <strong>Esporta solo whitelist</strong>
+            <small>JSON con i soli numeri sicuri</small>
+          </div>
+        </button>
+      </div>
+
+      <h2 class="section-title">Importa</h2>
+      <div class="tool-group">
+        <button class="tool-btn" data-action="import-json">
+          <div class="tool-icon">JSON</div>
+          <div class="tool-text">
+            <strong>Importa JSON</strong>
+            <small>Sostituisce o unisce il database</small>
+          </div>
+        </button>
+        <button class="tool-btn" data-action="import-csv">
+          <div class="tool-icon">CSV</div>
+          <div class="tool-text">
+            <strong>Importa CSV</strong>
+            <small>Colonne: <code>number,label,action,notes</code></small>
+          </div>
+        </button>
+      </div>
+
+      <h2 class="section-title">Database</h2>
+      <div class="tool-group">
+        <button class="tool-btn" data-action="show-stats">
+          <div class="tool-icon">i</div>
+          <div class="tool-text">
+            <strong>Statistiche dettagliate</strong>
+            <small>Vedi distribuzione per categoria</small>
+          </div>
+        </button>
+        <button class="tool-btn tool-danger" data-action="wipe-db">
+          <div class="tool-icon">!</div>
+          <div class="tool-text">
+            <strong>Cancella tutto il database</strong>
+            <small>Operazione irreversibile · richiede conferma</small>
+          </div>
+        </button>
+      </div>
+
+      <h2 class="section-title">Privacy</h2>
+      <div class="info-card">
+        <p><strong>Tutti i dati restano sul tuo dispositivo.</strong></p>
+        <ul class="dot-list">
+          <li>Nessun server, nessun cloud, nessun account.</li>
+          <li>Nessun tracking, nessun cookie pubblicitario.</li>
+          <li>Nessuna API esterna — la PWA funziona anche offline.</li>
+          <li>Storage usato: <code>localStorage</code> del browser.</li>
+        </ul>
+        <p class="info-warn">
+          <strong>Nota importante.</strong> Su iPhone, una PWA <em>non può bloccare</em> realmente le chiamate.
+          Questa app gestisce il database e produce un file <code>spam-numbers.json</code>
+          che potrà alimentare una futura app iOS nativa con CallKit / Call Directory Extension.
+        </p>
+      </div>
+
+      <div class="footer-credit">
+        PezzaliGuard · build privacy-first · <span id="footerVersion">v1.0.0</span>
+      </div>
+
+    </section>
+
+  </main>
+
+  <!-- ================================================================== -->
+  <!-- FAB (add quick)                                                     -->
+  <!-- ================================================================== -->
+  <button class="fab" id="fab" aria-label="Aggiungi numero">
+    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+      <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+    </svg>
+  </button>
+
+  <!-- ================================================================== -->
+  <!-- BOTTOM NAV                                                          -->
+  <!-- ================================================================== -->
+  <nav class="bottom-nav" role="navigation" aria-label="Navigazione principale">
+    <button class="nav-btn active" data-view="dashboard">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 12 12 3l9 9"/><path d="M5 10v10h14V10"/>
+      </svg>
+      <span>Home</span>
+    </button>
+    <button class="nav-btn" data-view="numbers">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2 4 5v7c0 5 3.5 8.5 8 10 4.5-1.5 8-5 8-10V5z"/>
+      </svg>
+      <span>Spam</span>
+    </button>
+    <button class="nav-btn" data-view="whitelist">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"/>
+      </svg>
+      <span>Whitelist</span>
+    </button>
+    <button class="nav-btn" data-view="tools">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+      <span>Strumenti</span>
+    </button>
+  </nav>
+
+  <!-- ================================================================== -->
+  <!-- MODAL — add / edit number                                           -->
+  <!-- ================================================================== -->
+  <div class="modal" id="modal" hidden>
+    <div class="modal-backdrop" data-close></div>
+    <div class="modal-sheet" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-grip" aria-hidden="true"></div>
+      <header class="modal-head">
+        <h3 id="modalTitle">Nuovo numero</h3>
+        <button class="icon-btn" data-close aria-label="Chiudi">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </header>
+
+      <form id="entryForm" class="modal-body" novalidate>
+        <input type="hidden" id="f_id" />
+
+        <label class="field">
+          <span class="field-label">Numero di telefono</span>
+          <input id="f_number" type="tel" inputmode="tel" autocomplete="off" required
+                 placeholder="+39 02 1234 5678" />
+          <small class="field-hint">Verrà normalizzato in formato internazionale.</small>
+        </label>
+
+        <label class="field">
+          <span class="field-label">Etichetta</span>
+          <select id="f_label">
+            <option value="SPAM">SPAM</option>
+            <option value="Call Center">Call Center</option>
+            <option value="Truffa">Truffa</option>
+            <option value="Energia">Energia / Gas / Luce</option>
+            <option value="Trading">Trading / Investimenti</option>
+            <option value="Sospetto">Sospetto</option>
+            <option value="Cliente">Cliente</option>
+            <option value="Fornitore">Fornitore</option>
+            <option value="Famiglia">Famiglia</option>
+            <option value="Lavoro">Lavoro</option>
+            <option value="Altro">Altro</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span class="field-label">Etichetta personalizzata <small>(opzionale)</small></span>
+          <input id="f_label_custom" type="text" maxlength="60" placeholder="Es. SPAM - Telemarketing energia" />
+          <small class="field-hint">Se compilata sostituisce l'etichetta sopra nel JSON esportato.</small>
+        </label>
+
+        <fieldset class="action-toggle" id="actionToggle">
+          <legend>Azione</legend>
+          <label class="toggle-opt toggle-identify">
+            <input type="radio" name="action" value="identify" />
+            <span><strong>Identifica</strong><small>Mostra etichetta in chiamata</small></span>
+          </label>
+          <label class="toggle-opt toggle-block">
+            <input type="radio" name="action" value="block" />
+            <span><strong>Blocca</strong><small>Rifiuta chiamata in arrivo</small></span>
+          </label>
+          <label class="toggle-opt toggle-whitelist">
+            <input type="radio" name="action" value="whitelist" />
+            <span><strong>Whitelist</strong><small>Numero sicuro</small></span>
+          </label>
+        </fieldset>
+
+        <label class="field">
+          <span class="field-label">Note <small>(opzionale)</small></span>
+          <textarea id="f_notes" rows="2" maxlength="300" placeholder="Es. chiamato 3 volte, finto operatore Enel"></textarea>
+        </label>
+
+        <p class="field-meta" id="f_meta"></p>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-ghost" id="deleteBtn" hidden>Elimina</button>
+          <button type="button" class="btn btn-secondary" data-close>Annulla</button>
+          <button type="submit" class="btn btn-primary" id="saveBtn">Salva</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Hidden file input used by import flows -->
+  <input type="file" id="fileInput" accept=".json,.csv,application/json,text/csv" hidden />
+
+  <!-- Toast container -->
+  <div class="toast-stack" id="toastStack" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Confirm dialog (shared) -->
+  <div class="modal" id="confirm" hidden>
+    <div class="modal-backdrop" data-confirm-close></div>
+    <div class="modal-sheet modal-sheet-sm" role="alertdialog" aria-modal="true" aria-labelledby="confirmTitle">
+      <header class="modal-head"><h3 id="confirmTitle">Conferma</h3></header>
+      <div class="modal-body">
+        <p id="confirmMsg" class="confirm-msg">Procedere?</p>
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" data-confirm-close>Annulla</button>
+          <button type="button" class="btn btn-danger" id="confirmOk">Conferma</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js" defer></script>
+</body>
+</html>

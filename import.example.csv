@@ -1,0 +1,10 @@
+number,label,action,notes
++39 02 1234 5678,SPAM - Telemarketing,identify,Operatore finto Enel
++39 06 8765 4321,Call Center - Energia,identify,Chiamate a tutte le ore
++39 06 5544 3322,Trading,identify,Investimenti dubbi
++39 02 9876 5432,SPAM,block,Numero recidivo
++39 02 9911 2233,SPAM,block,
++39 02 7788 9900,Truffa,block,Tenta truffa bonifico
++39 333 1234567,Cliente,whitelist,Mario Rossi
++39 349 7654321,Fornitore,whitelist,Tipografia Bianchi
++39 328 1122334,Famiglia,whitelist,
