@@ -11,7 +11,7 @@
      0. Constants
      ----------------------------------------------------------------- */
   const STORAGE_KEY = 'pezzaliguard:db:v1';
-  const APP_VERSION = '1.3.0';
+  const APP_VERSION = '1.4.0';
   const DB_VERSION  = '1.0.0';
 
   // Categories used in the dropdown — single source of truth.
@@ -833,7 +833,11 @@
       'PezzaliGuard è 100% locale. Non viene inviato alcun dato a server, non ci sono account, ' +
       'cookie pubblicitari o tracker. I dati restano nel tuo browser (localStorage).\n\n' +
       'IMPORTANTE: su iPhone, una PWA NON può bloccare le chiamate. Questa app gestisce il database e ' +
-      'genera un file spam-numbers.json che alimenterà la futura app iOS nativa con CallKit.',
+      'genera un file spam-numbers.json che alimenterà la futura app iOS nativa con CallKit.\n\n' +
+      '———\n' +
+      'PezzaliGuard · v' + APP_VERSION + '\n' +
+      'Made with ❤️ in Italia da Alessandro Pezzali\n' +
+      'Parte del progetto PezzaliApp · pezzaliapp.com',
       { okText: 'Capito', danger: false }
     );
   }

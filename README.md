@@ -349,4 +349,9 @@ generalista, non si sostituisce a soluzioni native del sistema operativo,
 non promette risultati di blocco reali finché non viene affiancato a
 un'app iOS nativa con CallKit.
 
-Made with ❤️ — privacy first.
+---
+
+**Autore**: Alessandro Pezzali — parte del progetto **PezzaliApp**
+🔗 [alessandropezzali.it](https://alessandropezzali.it) · [pezzaliapp.com](https://pezzaliapp.com)
+
+Made with ❤️ in Italia — privacy first.
