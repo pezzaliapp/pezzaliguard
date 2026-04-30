@@ -11,6 +11,7 @@
      0. Constants
      ----------------------------------------------------------------- */
   const STORAGE_KEY = 'pezzaliguard:db:v1';
+  const APP_VERSION = '1.2.0';
   const DB_VERSION  = '1.0.0';
 
   // Categories used in the dropdown — single source of truth.
@@ -230,8 +231,8 @@
     renderDashboard();
     renderNumbersList();
     renderWhitelist();
-    document.getElementById('dbVersion').textContent    = state.db.version || DB_VERSION;
-    document.getElementById('footerVersion').textContent = 'v' + (state.db.version || DB_VERSION);
+    document.getElementById('dbVersion').textContent    = APP_VERSION;
+    document.getElementById('footerVersion').textContent = 'v' + APP_VERSION;
   }
 
   function renderDashboard() {
@@ -437,6 +438,8 @@
 
     modal.hidden = false;
     setTimeout(() => document.getElementById('f_number').focus(), 60);
+    // Refresh prefix-warning banner with current value (covers edit mode)
+    if (PrefixWatcher.refreshBanner) PrefixWatcher.refreshBanner();
   }
 
   function closeModal() {
@@ -1173,6 +1176,126 @@
   };
 
   /* -----------------------------------------------------------------
+     14c. Prefix watcher — detect dangerous phone-number prefixes
+          (Wangiri, premium-rate, future AGCom marketing prefixes)
+     ----------------------------------------------------------------- */
+  const PrefixWatcher = {
+    url: 'community-lists/prefix-warnings.json',
+    data: null,            // { categories, prefixes (sorted desc by length) }
+    refreshBanner: null,   // bound after first render
+
+    async init() {
+      try {
+        const res = await fetch(PrefixWatcher.url, { cache: 'no-cache' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const json = await res.json();
+        // Pre-compute digits-only form of each prefix and sort longest-first.
+        // Longest-first ensures e.g. "+39 899" wins over a hypothetical "+39".
+        const prefixes = (json.prefixes || [])
+          .map(p => ({ ...p, digitsOnly: String(p.prefix || '').replace(/\D/g, '') }))
+          .filter(p => p.digitsOnly.length >= 2)
+          .sort((a, b) => b.digitsOnly.length - a.digitsOnly.length);
+        PrefixWatcher.data = { ...json, prefixes };
+        return PrefixWatcher.data;
+      } catch (err) {
+        console.warn('[prefix] load failed', err);
+        return null;
+      }
+    },
+
+    // digits = E.164 string without '+' (output of normalizeNumber)
+    match(digits) {
+      if (!PrefixWatcher.data || !digits) return null;
+      for (const p of PrefixWatcher.data.prefixes) {
+        if (p.digitsOnly && digits.startsWith(p.digitsOnly)) {
+          const cat = (PrefixWatcher.data.categories || {})[p.category] || {};
+          return {
+            prefix: p.prefix,
+            country: p.country,
+            category: p.category,
+            severity: cat.severity || 'warning',
+            label: cat.label || 'Avviso',
+            description: cat.description || '',
+            pending: !!cat.pending
+          };
+        }
+      }
+      return null;
+    },
+
+    // Wire the warning banner under the number input in the add/edit modal
+    bindFormWatcher() {
+      const input  = document.getElementById('f_number');
+      const banner = document.getElementById('f_number_warning');
+      if (!input || !banner) return;
+
+      const update = () => {
+        const digits = normalizeNumber(input.value);
+        const m = PrefixWatcher.match(digits);
+        if (!m) {
+          banner.hidden = true;
+          banner.className = 'prefix-warning';
+          banner.innerHTML = '';
+          return;
+        }
+        banner.hidden = false;
+        banner.className = 'prefix-warning sev-' + (m.severity || 'warning');
+        banner.innerHTML = `
+          <div class="prefix-warning-head">
+            <strong>${esc(m.label)}</strong>
+            <span class="prefix-warning-tag">${esc(m.prefix)}${m.country ? ' · ' + esc(m.country) : ''}</span>
+          </div>
+          <div class="prefix-warning-desc">${esc(m.description)}</div>
+        `;
+      };
+
+      input.addEventListener('input', update);
+      PrefixWatcher.refreshBanner = update;
+    },
+
+    // Render the informational section in the Strumenti view
+    renderInfoSection() {
+      const root = document.getElementById('prefixWarningsList');
+      if (!root) return;
+      const data = PrefixWatcher.data;
+      if (!data || !data.categories) {
+        root.innerHTML = '<div class="empty-state"><p>Lista prefissi non disponibile.</p></div>';
+        return;
+      }
+
+      // Group prefixes by category
+      const grouped = {};
+      for (const p of data.prefixes) {
+        (grouped[p.category] = grouped[p.category] || []).push(p);
+      }
+
+      const sections = Object.keys(data.categories).map(catKey => {
+        const cat = data.categories[catKey];
+        const items = grouped[catKey] || [];
+        const itemsHTML = items.length
+          ? `<ul class="prefix-list">${items.map(p =>
+              `<li><code>${esc(p.prefix)}</code>${p.country ? ' <span class="muted">' + esc(p.country) + '</span>' : ''}</li>`
+            ).join('')}</ul>`
+          : (cat.pending
+              ? '<p class="prefix-pending"><em>In attesa della pubblicazione ufficiale dei prefissi.</em></p>'
+              : '<p class="muted">Nessun prefisso in questa categoria.</p>');
+        return `
+          <article class="prefix-cat sev-${esc(cat.severity || 'info')}">
+            <header class="prefix-cat-head">
+              <strong>${esc(cat.label)}</strong>
+              ${cat.pending ? '<span class="prefix-pending-badge">In attesa</span>' : ''}
+            </header>
+            <p class="prefix-cat-desc">${esc(cat.description || '')}</p>
+            ${itemsHTML}
+          </article>
+        `;
+      }).join('');
+
+      root.innerHTML = sections;
+    }
+  };
+
+  /* -----------------------------------------------------------------
      15. Service worker registration
      ----------------------------------------------------------------- */
   function registerSW() {
@@ -1192,6 +1315,10 @@
     render();
     registerSW();
     CommunityLists.render();
+    PrefixWatcher.init().then(() => {
+      PrefixWatcher.bindFormWatcher();
+      PrefixWatcher.renderInfoSection();
+    });
   });
 
 })();

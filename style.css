@@ -87,7 +87,7 @@ body {
     radial-gradient(900px 500px at 80% -10%, rgba(108,140,255,.07), transparent 60%),
     radial-gradient(800px 600px at -10% 110%, rgba(255,77,94,.06), transparent 60%),
     var(--bg);
-  padding-bottom: calc(var(--nav-h) + var(--sa-bottom));
+  padding-bottom: calc(var(--nav-h) + var(--sa-bottom) + 84px);
 }
 
 button { font: inherit; color: inherit; cursor: pointer; }
@@ -334,7 +334,7 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
    ------------------------------------------------------------------- */
 .quick-actions {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 10px;
 }
 .qa-btn {
@@ -364,7 +364,8 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
 .qa-icon-amber  { background: var(--identify-soft);  color: var(--identify); }
 
 .qa-text { display: flex; flex-direction: column; min-width: 0; }
-.qa-text strong { font-size: 14px; font-weight: 600; line-height: 1.25; }
+.qa-text strong { font-size: 14px; font-weight: 600; line-height: 1.25;
+                  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .qa-text small  { color: var(--text-3); font-size: 11.5px; margin-top: 2px;
                   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
@@ -1050,6 +1051,122 @@ input[type="search"]::-webkit-search-cancel-button { -webkit-appearance: none; }
   padding: 8px 10px;
   margin-top: 8px;
   line-height: 1.45;
+}
+
+/* -------------------------------------------------------------------
+   19. Prefix warnings (form banner + info section in Strumenti)
+   ------------------------------------------------------------------- */
+
+/* Banner sotto il campo numero in add/edit modal */
+.prefix-warning {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  font-size: 12.5px;
+  line-height: 1.45;
+  animation: fade .2s ease both;
+}
+.prefix-warning[hidden] { display: none; }
+
+.prefix-warning-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.prefix-warning-head strong { font-size: 13px; font-weight: 600; }
+.prefix-warning-tag {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: .02em;
+  color: var(--text-3);
+  white-space: nowrap;
+}
+.prefix-warning-desc { color: var(--text-2); }
+
+/* Severity variants — shared across form banner and info cards */
+.sev-danger {
+  background: var(--block-soft);
+  border-color: var(--block-border);
+  color: #ffd0d6;
+}
+.sev-danger .prefix-warning-head strong,
+.sev-danger .prefix-cat-head strong { color: var(--block); }
+
+.sev-warning {
+  background: var(--identify-soft);
+  border-color: var(--identify-border);
+  color: #ffe2b3;
+}
+.sev-warning .prefix-warning-head strong,
+.sev-warning .prefix-cat-head strong { color: var(--identify); }
+
+.sev-info {
+  background: var(--accent-soft);
+  border-color: rgba(108,140,255,.34);
+  color: #c8d3ff;
+}
+.sev-info .prefix-warning-head strong,
+.sev-info .prefix-cat-head strong { color: var(--accent); }
+
+/* Info section in Strumenti */
+.prefix-cat-list {
+  display: flex; flex-direction: column; gap: 10px;
+}
+.prefix-cat {
+  padding: 14px;
+  border-radius: var(--r-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.prefix-cat.sev-danger  { background: linear-gradient(160deg, rgba(255,77,94,.06),  transparent); border-color: var(--block-border); }
+.prefix-cat.sev-warning { background: linear-gradient(160deg, rgba(255,181,71,.06), transparent); border-color: var(--identify-border); }
+.prefix-cat.sev-info    { background: linear-gradient(160deg, rgba(108,140,255,.06), transparent); border-color: rgba(108,140,255,.34); }
+
+.prefix-cat-head {
+  display: flex; align-items: center; gap: 8px;
+  margin-bottom: 4px;
+}
+.prefix-cat-head strong { font-size: 14px; font-weight: 600; }
+.prefix-pending-badge {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  color: var(--text-2);
+}
+.prefix-cat-desc {
+  font-size: 12.5px;
+  color: var(--text-2);
+  margin: 0 0 10px;
+  line-height: 1.5;
+}
+.prefix-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+}
+.prefix-list li {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-soft);
+  padding: 4px 9px;
+  border-radius: 8px;
+  color: var(--text);
+}
+.prefix-list .muted { color: var(--text-3); font-size: 10.5px; }
+.prefix-pending {
+  font-size: 12px;
+  color: var(--text-3);
+  margin: 8px 0 0;
 }
 
 /* Reduced motion */

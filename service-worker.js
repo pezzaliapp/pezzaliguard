@@ -7,7 +7,7 @@
    The cache name is versioned; bumping the suffix invalidates old caches.
    =================================================================== */
 
-const CACHE = 'pezzaliguard-v1.1.0';
+const CACHE = 'pezzaliguard-v1.3.0';
 
 // Files we want available offline. All paths are relative to the SW scope,
 // so the same file works on root domains AND on any GitHub Pages subpath.
@@ -23,7 +23,8 @@ const ASSETS = [
   'icons/icon-maskable.png',
   'icons/apple-touch-icon.png',
   'community-lists/index.json',
-  'community-lists/italia-spam.json'
+  'community-lists/italia-spam.json',
+  'community-lists/prefix-warnings.json'
 ];
 
 // ---- INSTALL --------------------------------------------------------

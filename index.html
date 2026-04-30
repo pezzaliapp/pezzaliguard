@@ -88,7 +88,7 @@
             </svg>
           </div>
           <div class="stat-num" id="countBlock">0</div>
-          <div class="stat-label">Blacklist (block)</div>
+          <div class="stat-label">Blacklist</div>
         </article>
 
         <article class="stat-card stat-identify">
@@ -99,7 +99,7 @@
             </svg>
           </div>
           <div class="stat-num" id="countIdentify">0</div>
-          <div class="stat-label">Identifica (spam)</div>
+          <div class="stat-label">Identifica</div>
         </article>
 
         <article class="stat-card stat-whitelist">
@@ -109,7 +109,7 @@
             </svg>
           </div>
           <div class="stat-num" id="countWhitelist">0</div>
-          <div class="stat-label">Whitelist (sicuri)</div>
+          <div class="stat-label">Whitelist</div>
         </article>
       </div>
 
@@ -250,6 +250,16 @@
         </div>
       </div>
 
+      <h2 class="section-title">Prefissi pericolosi</h2>
+      <p class="info-banner">
+        Quando aggiungi un numero, l'app rileva automaticamente i prefissi
+        noti per truffe Wangiri, numerazioni a pagamento e (in futuro)
+        prefissi AGCom per il marketing.
+      </p>
+      <div id="prefixWarningsList" class="prefix-cat-list">
+        <div class="empty-state"><p>Caricamento…</p></div>
+      </div>
+
       <h2 class="section-title">Database</h2>
       <div class="tool-group">
         <button class="tool-btn" data-action="show-stats">
@@ -354,6 +364,7 @@
           <input id="f_number" type="tel" inputmode="tel" autocomplete="off" required
                  placeholder="+39 02 1234 5678" />
           <small class="field-hint">Verrà normalizzato in formato internazionale.</small>
+          <div id="f_number_warning" class="prefix-warning" hidden></div>
         </label>
 
         <label class="field">

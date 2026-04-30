@@ -20,6 +20,7 @@ in futuro da un'app iOS nativa con `CallKit / CallDirectoryExtension`.
 - ✅ **Esportare** l'intero database come `spam-numbers.json` o come `.csv`.
 - ✅ **Importare** da JSON o CSV (sostituisci o unisci).
 - ✅ **Importare con un click liste community** (italiana curata + database GitHub pubblici via CDN).
+- ✅ **Avvisare in tempo reale** sui prefissi pericolosi (Wangiri esteri, numerazioni a pagamento italiane, futuri prefissi AGCom).
 - ✅ Funzionare **offline** una volta caricata la prima volta.
 - ✅ Essere installata come app dallo smartphone (icona sulla home screen).
 - ✅ Non chiama mai server esterni: tutti i dati restano nel browser.
@@ -100,6 +101,34 @@ Se vuoi usare un tuo dominio (`guard.pezzaliapp.it` per esempio):
 1. Aggiungi un file `CNAME` con dentro il dominio.
 2. Configura un record DNS `CNAME` verso `<TUO-UTENTE>.github.io`.
 3. **Settings** → **Pages** → imposta il custom domain.
+
+---
+
+## ✦ Prefissi pericolosi
+
+Quando aggiungi (o modifichi) un numero, l'app analizza il prefisso in tempo
+reale e mostra un banner di avviso sotto il campo se il numero rientra in
+una di queste categorie:
+
+| Categoria | Severità | Esempi prefissi |
+|---|---|---|
+| **Truffa Wangiri (estero)** | 🔴 danger | `+255` (Tanzania), `+370` (Lituania), `+371` (Lettonia), `+375` (Bielorussia), `+381` (Serbia), `+563` (Cile) |
+| **Numerazione italiana a pagamento** | 🟡 warning | `+39 899`, `+39 144`, `+39 166` |
+| **Marketing AGCom** (delibera 21/26/CIR) | 🔵 info | *In attesa della pubblicazione ufficiale dei prefissi* |
+
+L'elenco completo è consultabile in **Strumenti → Prefissi pericolosi**.
+
+### Estendere la lista
+
+Tutto vive in `community-lists/prefix-warnings.json`. Puoi:
+
+- aggiungere nuovi prefissi nella sezione `prefixes`
+- creare nuove categorie in `categories` (con `severity: danger | warning | info`)
+- popolare `agcom-marketing` quando AGCom pubblicherà i prefissi a 3 cifre
+
+Il matcher è **greedy**: se hai sia `+39` che `+39 899`, vince il più lungo.
+Il formato del prefisso è cosmetico (`+39 899` o `+39899` sono equivalenti):
+prima del confronto viene normalizzato in cifre.
 
 ---
 
@@ -285,7 +314,8 @@ pezzaliguard/
 │   └── apple-touch-icon.png
 └── community-lists/
     ├── index.json              ← directory delle liste disponibili
-    └── italia-spam.json        ← lista italiana curata (locale)
+    ├── italia-spam.json        ← lista italiana curata (locale)
+    └── prefix-warnings.json    ← prefissi pericolosi + struttura AGCom
 ```
 
 Nessuna dipendenza npm. Nessun build step. Push e funziona.
