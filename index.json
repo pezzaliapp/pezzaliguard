@@ -1,0 +1,31 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-04-30",
+  "lists": [
+    {
+      "id": "italia-spam-curated",
+      "name": "Lista italiana curata",
+      "description": "Numeri italiani segnalati pubblicamente come truffe e telemarketing aggressivo. Fonti: Unione Consumatori, Cesvol, Polizia Postale.",
+      "source": "PezzaliGuard - locale",
+      "url": "community-lists/italia-spam.json",
+      "format": "pezzaliguard-json",
+      "default_action": "identify",
+      "category": "italia",
+      "size_hint": "~10 numeri + prefissi pericolosi",
+      "external": false
+    },
+    {
+      "id": "oros42-international",
+      "name": "Oros42 phone-blacklist (internazionale)",
+      "description": "Lista internazionale di numeri spam/scam mantenuta su GitHub. Servita via CDN jsDelivr.",
+      "source": "github.com/Oros42/phone-blacklist",
+      "url": "https://cdn.jsdelivr.net/gh/Oros42/phone-blacklist@master/blacklist.csv",
+      "format": "csv-numbers-only",
+      "default_action": "identify",
+      "category": "internazionale",
+      "size_hint": "~25 numeri",
+      "external": true,
+      "warning": "Scaricamento da rete esterna (jsDelivr CDN). Il tuo IP sarà visibile a quel CDN durante il download."
+    }
+  ]
+}

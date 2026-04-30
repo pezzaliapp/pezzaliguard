@@ -940,6 +940,239 @@
   }
 
   /* -----------------------------------------------------------------
+     14b. Community lists (importable phone-number databases)
+     ----------------------------------------------------------------- */
+  const CommunityLists = {
+    indexUrl: 'community-lists/index.json',
+    cache: null,
+
+    // Load the directory of available lists from the local index.json
+    async loadIndex() {
+      if (CommunityLists.cache) return CommunityLists.cache;
+      try {
+        const res = await fetch(CommunityLists.indexUrl, { cache: 'no-cache' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+        CommunityLists.cache = data;
+        return data;
+      } catch (err) {
+        console.warn('[community] index load failed', err);
+        return null;
+      }
+    },
+
+    // Render the cards inside #communityLists
+    async render() {
+      const root  = document.getElementById('communityLists');
+      const empty = document.getElementById('communityListsEmpty');
+      if (!root) return;
+
+      const data = await CommunityLists.loadIndex();
+      if (!data || !Array.isArray(data.lists) || data.lists.length === 0) {
+        if (empty) empty.innerHTML = '<p>Nessuna lista community disponibile.</p>';
+        return;
+      }
+
+      root.innerHTML = data.lists.map(list => CommunityLists.cardHTML(list)).join('');
+      // Wire up buttons
+      root.querySelectorAll('.community-import-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const id = btn.dataset.listId;
+          const list = data.lists.find(l => l.id === id);
+          if (list) CommunityLists.handleImport(list, btn);
+        });
+      });
+    },
+
+    cardHTML(list) {
+      const badgeClass = list.external ? 'cdn' : 'local';
+      const badgeText  = list.external ? 'CDN' : 'Locale';
+      const warning    = list.warning
+        ? `<div class="community-warn">${esc(list.warning)}</div>`
+        : '';
+      return `
+        <article class="community-card" data-list-id="${esc(list.id)}">
+          <div class="community-card-main">
+            <div class="community-card-title">
+              ${esc(list.name)}
+              <span class="community-card-badge ${badgeClass}">${badgeText}</span>
+            </div>
+            <div class="community-card-desc">${esc(list.description)}</div>
+            <div class="community-card-meta">
+              <span><strong>Fonte:</strong> ${esc(list.source)}</span>
+              <span><strong>Dimensione:</strong> ${esc(list.size_hint || '—')}</span>
+              <span><strong>Categoria:</strong> ${esc(list.category || '—')}</span>
+            </div>
+            ${warning}
+          </div>
+          <div class="community-card-actions">
+            <button class="community-import-btn primary" data-list-id="${esc(list.id)}">
+              Importa nel database
+            </button>
+          </div>
+        </article>
+      `;
+    },
+
+    async handleImport(list, btnEl) {
+      const card = btnEl.closest('.community-card');
+
+      // External lists need explicit consent (privacy disclosure)
+      if (list.external) {
+        const ok = await confirmDialog(
+          `Per scaricare "${list.name}" la PWA contatterà:\n\n${list.url}\n\n` +
+          `Il tuo IP sarà visibile a quel server. I dati scaricati restano comunque locali sul tuo dispositivo.\n\nProcedere?`,
+          { okText: 'Scarica', danger: false }
+        );
+        if (!ok) return;
+      }
+
+      CommunityLists.setCardState(card, btnEl, 'loading', 'Scaricamento…');
+
+      try {
+        const text = await CommunityLists.fetchWithTimeout(list.url, 12000);
+        const incoming = CommunityLists.parse(text, list);
+        if (incoming.length === 0) {
+          CommunityLists.setCardState(card, btnEl, 'error', 'Lista vuota');
+          toast('La lista non contiene numeri validi.', 'warn');
+          return;
+        }
+        // Merge into local DB (do not auto-replace)
+        applyImport(incoming, 'merge');
+        CommunityLists.setCardState(card, btnEl, 'success', `Importati ${incoming.length} numeri ✓`);
+      } catch (err) {
+        console.warn('[community] import failed', err);
+        CommunityLists.setCardState(card, btnEl, 'error', 'Errore download');
+        toast('Errore: ' + (err.message || 'download fallito'), 'error');
+      }
+    },
+
+    setCardState(card, btnEl, kind, label) {
+      if (!card || !btnEl) return;
+      card.classList.remove('is-loading','is-success','is-error');
+      btnEl.disabled = false;
+      if (kind === 'loading') {
+        card.classList.add('is-loading');
+        btnEl.disabled = true;
+        btnEl.innerHTML = `<span class="community-spinner" aria-hidden="true"></span> ${esc(label)}`;
+      } else if (kind === 'success') {
+        card.classList.add('is-success');
+        btnEl.textContent = label;
+      } else if (kind === 'error') {
+        card.classList.add('is-error');
+        btnEl.textContent = label + ' — riprova';
+      } else {
+        btnEl.textContent = 'Importa nel database';
+      }
+    },
+
+    // fetch with abortable timeout
+    fetchWithTimeout(url, ms) {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), ms);
+      return fetch(url, { signal: ctrl.signal, cache: 'no-cache' })
+        .then(res => {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.text();
+        })
+        .finally(() => clearTimeout(t));
+    },
+
+    // Convert raw list content to internal records, based on declared format
+    parse(text, list) {
+      const fmt = list.format || 'csv';
+      const defAction = list.default_action === 'block' ? 'block'
+                      : list.default_action === 'whitelist' ? 'whitelist'
+                      : 'identify';
+
+      // ---- pezzaliguard-json: same shape as our spam-numbers.json ----
+      if (fmt === 'pezzaliguard-json') {
+        const data = JSON.parse(text);
+        const out = [];
+        const pushItems = (arr, action, fallbackLabel) => {
+          if (!Array.isArray(arr)) return;
+          for (const it of arr) {
+            const num = (typeof it === 'object' && it !== null) ? it.number : it;
+            const label = (typeof it === 'object' && it !== null && it.label) ? it.label : fallbackLabel;
+            const digits = normalizeNumber(num);
+            if (!digits) continue;
+            out.push({
+              numberDigits: digits,
+              category: 'SPAM',
+              label,
+              action,
+              notes: 'Importato da: ' + list.name
+            });
+          }
+        };
+        pushItems(data.identify,  'identify',  'SPAM');
+        pushItems(data.block,     'block',     'Blacklist');
+        pushItems(data.whitelist, 'whitelist', 'Whitelist');
+        return out;
+      }
+
+      // ---- csv-numbers-only: one number per line, optional comma comment after ----
+      if (fmt === 'csv-numbers-only' || fmt === 'txt') {
+        const out = [];
+        const lines = text.split(/\r?\n/);
+        for (const raw of lines) {
+          const line = raw.trim();
+          if (!line) continue;
+          if (line.startsWith('#') || line.startsWith('//')) continue;
+          // Take everything up to the first comma/semicolon (NOT space, since
+          // numbers like "+39 02 8088 6927" contain spaces).
+          const token = line.split(/[,;]/)[0].trim();
+          const digits = normalizeNumber(token);
+          if (!digits || digits.length < 6) continue;
+          out.push({
+            numberDigits: digits,
+            category: 'SPAM',
+            label: list.name,
+            action: defAction,
+            notes: 'Importato da: ' + list.name
+          });
+        }
+        return out;
+      }
+
+      // ---- csv with header: number,label,action,notes ----
+      if (fmt === 'csv') {
+        const rows = parseCSV(text);
+        if (rows.length === 0) return [];
+        const first = rows[0].map(h => (h || '').trim().toLowerCase());
+        const hasHeader = ['number','label','action','notes'].some(h => first.includes(h));
+        const idx = {
+          number: hasHeader ? first.indexOf('number') : 0,
+          label:  hasHeader ? first.indexOf('label')  : 1,
+          action: hasHeader ? first.indexOf('action') : 2,
+          notes:  hasHeader ? first.indexOf('notes')  : 3
+        };
+        const dataRows = hasHeader ? rows.slice(1) : rows;
+        const out = [];
+        for (const r of dataRows) {
+          const num = idx.number >= 0 ? r[idx.number] : r[0];
+          if (!num) continue;
+          const digits = normalizeNumber(num);
+          if (!digits || digits.length < 6) continue;
+          const action = (idx.action >= 0 ? (r[idx.action] || '') : '').trim().toLowerCase();
+          const validAction = ['identify','block','whitelist'].includes(action) ? action : defAction;
+          const label = (idx.label >= 0 ? (r[idx.label] || '') : '').trim() || list.name;
+          out.push({
+            numberDigits: digits,
+            category: 'SPAM',
+            label,
+            action: validAction,
+            notes: 'Importato da: ' + list.name
+          });
+        }
+        return out;
+      }
+
+      throw new Error('Formato lista non supportato: ' + fmt);
+    }
+  };
+
+  /* -----------------------------------------------------------------
      15. Service worker registration
      ----------------------------------------------------------------- */
   function registerSW() {
@@ -958,6 +1191,7 @@
     bindGlobalEvents();
     render();
     registerSW();
+    CommunityLists.render();
   });
 
 })();

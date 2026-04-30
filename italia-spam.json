@@ -1,0 +1,33 @@
+{
+  "version": "1.0.0",
+  "updated": "2026-04-30",
+  "name": "Lista community italiana",
+  "description": "Numeri italiani pubblicamente segnalati come spam, truffa o telemarketing aggressivo. Fonti: segnalazioni Unione Consumatori, Cesvol, Money.it, Polizia Postale.",
+  "source": "PezzaliGuard community seed",
+  "license": "CC0 - Public domain",
+  "identify": [
+    { "number": 390280886927, "label": "SPAM - Truffa Wangiri Milano (segnalazione storica)" },
+    { "number": 390280887028, "label": "SPAM - Truffa Milano" },
+    { "number": 390280887589, "label": "SPAM - Truffa Milano" },
+    { "number": 390222198700, "label": "SPAM - Truffa Milano" },
+    { "number": 390254863812, "label": "SPAM - Trading sospetto Milano" },
+    { "number": 390236598569, "label": "SPAM - Trading sospetto Milano" },
+    { "number": 39058603208100, "label": "Call Center - Livorno (VOIP)" }
+  ],
+  "block": [],
+  "whitelist": [],
+  "prefix_warnings": {
+    "international": [
+      { "prefix": "+255", "country": "Tanzania", "reason": "Wangiri / squillo a pagamento" },
+      { "prefix": "+370", "country": "Lituania", "reason": "Wangiri / squillo a pagamento" },
+      { "prefix": "+371", "country": "Lettonia", "reason": "Wangiri / squillo a pagamento" },
+      { "prefix": "+375", "country": "Bielorussia", "reason": "Wangiri / squillo a pagamento" },
+      { "prefix": "+381", "country": "Serbia", "reason": "Wangiri / squillo a pagamento" },
+      { "prefix": "+563", "country": "Cile (Valparaiso)", "reason": "Wangiri / squillo a pagamento" }
+    ],
+    "national": [
+      { "prefix": "899", "type": "italiano a pagamento", "reason": "Numerazione a tariffazione speciale" }
+    ],
+    "note": "I prefissi internazionali sopra sono usati per la 'truffa Wangiri': la chiamata squilla brevemente per indurti a richiamare a tariffe esorbitanti. Non richiamare mai numeri sconosciuti con questi prefissi."
+  }
+}

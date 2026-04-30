@@ -19,6 +19,7 @@ in futuro da un'app iOS nativa con `CallKit / CallDirectoryExtension`.
 - ✅ Modificare ed eliminare singoli numeri.
 - ✅ **Esportare** l'intero database come `spam-numbers.json` o come `.csv`.
 - ✅ **Importare** da JSON o CSV (sostituisci o unisci).
+- ✅ **Importare con un click liste community** (italiana curata + database GitHub pubblici via CDN).
 - ✅ Funzionare **offline** una volta caricata la prima volta.
 - ✅ Essere installata come app dallo smartphone (icona sulla home screen).
 - ✅ Non chiama mai server esterni: tutti i dati restano nel browser.
@@ -99,6 +100,54 @@ Se vuoi usare un tuo dominio (`guard.pezzaliapp.it` per esempio):
 1. Aggiungi un file `CNAME` con dentro il dominio.
 2. Configura un record DNS `CNAME` verso `<TUO-UTENTE>.github.io`.
 3. **Settings** → **Pages** → imposta il custom domain.
+
+---
+
+## ✦ Liste community
+
+PezzaliGuard può importare con un click database pubblici di numeri spam.
+Apri **Strumenti → Liste community** per vedere le liste disponibili.
+
+Sono di due tipi:
+
+- **Locali (badge "Locale")** — incluse nel pacchetto, scaricate insieme alla
+  PWA, importabili anche offline. Esempio: la *Lista italiana curata* con i
+  numeri pubblicamente segnalati come truffe (segnalazioni Unione Consumatori,
+  Cesvol, Polizia Postale).
+- **Remote (badge "CDN")** — scaricate al volo da CDN pubblici (jsDelivr) che
+  servono repository GitHub open-source. Servono internet e una conferma
+  esplicita prima del download (per privacy: il tuo IP è visibile al CDN).
+
+Tutte le liste vengono **unite** ai tuoi numeri (duplicati aggiornati, niente
+viene cancellato). I dati restano sempre solo sul tuo dispositivo: dopo il
+download, la lista vive in `localStorage` come tutti gli altri numeri.
+
+### Aggiungere una nuova lista
+
+Modifica `community-lists/index.json` aggiungendo una voce:
+
+```json
+{
+  "id": "mia-lista",
+  "name": "La mia lista",
+  "description": "Cosa contiene",
+  "source": "github.com/mio-utente/mio-repo",
+  "url": "https://cdn.jsdelivr.net/gh/mio-utente/mio-repo@main/lista.csv",
+  "format": "csv-numbers-only",
+  "default_action": "identify",
+  "category": "italia",
+  "size_hint": "~100 numeri",
+  "external": true,
+  "warning": "Avviso privacy mostrato all'utente prima del download"
+}
+```
+
+Formati supportati:
+
+- `pezzaliguard-json` — JSON con la stessa struttura di `spam-numbers.json`
+- `csv` — CSV con header `number,label,action,notes` (come `import.example.csv`)
+- `csv-numbers-only` / `txt` — un numero per riga, righe che iniziano con
+  `#` o `//` ignorate, virgola o punto-e-virgola separano numero da commento
 
 ---
 
@@ -228,12 +277,15 @@ pezzaliguard/
 ├── README.md                   ← questo file
 ├── spam-numbers.example.json   ← esempio del formato di export
 ├── import.example.csv          ← esempio del formato di import
-└── icons/
-    ├── favicon.svg
-    ├── icon-192.png
-    ├── icon-512.png
-    ├── icon-maskable.png       ← per Android adaptive icons
-    └── apple-touch-icon.png
+├── icons/
+│   ├── favicon.svg
+│   ├── icon-192.png
+│   ├── icon-512.png
+│   ├── icon-maskable.png       ← per Android adaptive icons
+│   └── apple-touch-icon.png
+└── community-lists/
+    ├── index.json              ← directory delle liste disponibili
+    └── italia-spam.json        ← lista italiana curata (locale)
 ```
 
 Nessuna dipendenza npm. Nessun build step. Push e funziona.
